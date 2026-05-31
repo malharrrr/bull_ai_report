@@ -31,10 +31,20 @@ function updateDrop() {
   const size = f.size < 1048576
     ? (f.size / 1024).toFixed(1) + ' KB'
     : (f.size / 1048576).toFixed(2) + ' MB';
-  dropContent.innerHTML = `
-    <div class="drop-selected">✓ File selected</div>
-    <div class="drop-selected-name">${f.name} &nbsp;·&nbsp; ${size}</div>`;
-}
+  dropContent.textContent = '';
+  const selectedEl = document.createElement('div');
+  selectedEl.className = 'drop-selected';
+  selectedEl.textContent = '✓ File selected';
+
+  const nameEl = document.createElement('div');
+  nameEl.className = 'drop-selected-name';
+  nameEl.appendChild(document.createTextNode(f.name));
+  nameEl.appendChild(document.createTextNode(' \u00A0·\u00A0 '));
+  nameEl.appendChild(document.createTextNode(size));
+
+  dropContent.appendChild(selectedEl);
+  dropContent.appendChild(nameEl);
+}	
 
 function setStep(n, pct, msg) {
   progressFill.style.width = pct + '%';

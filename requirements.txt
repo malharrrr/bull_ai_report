@@ -6,3 +6,4 @@ pdfplumber
 python-dotenv
 numpy
 yfinance
+gunicorn

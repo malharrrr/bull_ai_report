@@ -1,3 +1,4 @@
+from importlib.resources import path
 import os
 import uuid
 import traceback
@@ -17,8 +18,8 @@ load_dotenv()
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024 
 
-UPLOAD_DIR = Path("uploads")
-OUTPUT_DIR = Path("outputs")
+UPLOAD_DIR = Path("uploads").resolve()
+OUTPUT_DIR = Path("outputs").resolve()
 UPLOAD_DIR.mkdir(exist_ok=True)
 OUTPUT_DIR.mkdir(exist_ok=True)
 
@@ -46,8 +47,7 @@ def generate():
         return jsonify({"error": "Unsupported file type."}), 400
 
     uid = uuid.uuid4().hex
-    suffix = Path(uploaded.filename).suffix.lower()
-    upload_path = UPLOAD_DIR / f"{uid}{suffix}"
+    upload_path = UPLOAD_DIR / f"{uid}.bin"
     uploaded.save(str(upload_path))
 
     try:
@@ -85,10 +85,14 @@ def generate():
 @app.route("/download/<filename>")
 def download(filename):
     safe = Path(filename).name
-    path = OUTPUT_DIR / safe
-    if not path.exists(): 
+    path = (OUTPUT_DIR / safe).resolve(strict=False) 	
+    try:
+        path.relative_to(OUTPUT_DIR)
+    except ValueError:
+        return "Invalid file path.", 400
+
+    if not path.exists() or not path.is_file():
         return "File not found.", 404
-        
     return send_file(str(path), as_attachment=True, download_name=safe, mimetype="application/pdf")
 
 
