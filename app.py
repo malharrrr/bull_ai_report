@@ -7,6 +7,7 @@ from pathlib import Path
 from flask import (
     Flask, request, send_file, send_from_directory, jsonify, render_template
 )
+from werkzeug.exceptions import NotFound
 from dotenv import load_dotenv
 
 from extractor import extract_financials
@@ -89,27 +90,22 @@ def download(file_id):
         return "Invalid file id.", 400
 
     safe_stored_name = f"{file_id}.pdf"
-    path = (OUTPUT_DIR / safe_stored_name).resolve(strict=False)
-    try:
-        path.relative_to(OUTPUT_DIR)
-    except ValueError:
-        return "Invalid file path.", 400
-
-    if not path.exists() or not path.is_file():
-        return "File not found.", 404
 
     requested_name = request.args.get("download_name", safe_stored_name)
     safe_download_name = Path(requested_name).name
     if not safe_download_name.lower().endswith(".pdf"):
         safe_download_name = f"{safe_download_name}.pdf"
 
-    return send_from_directory(
-        directory=str(OUTPUT_DIR),
-        path=safe_stored_name,
-        as_attachment=True,
-        download_name=safe_download_name,
-        mimetype="application/pdf",
-    )
+    try:
+        return send_from_directory(
+            directory=str(OUTPUT_DIR),
+            path=safe_stored_name,
+            as_attachment=True,
+            download_name=safe_download_name,
+            mimetype="application/pdf",
+        )
+    except NotFound:
+        return "File not found.", 404
 
 
 if __name__ == "__main__":
