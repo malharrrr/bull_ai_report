@@ -3,7 +3,7 @@ import yfinance as yf
 from google.genai import types
 from extractor import _get_client, FINANCIAL_SCHEMA
 
-def fetch_market_data(ticker: str) -> dict:
+def fetch_market_data(ticker: str, company_name: str) -> dict:
     """Fetches market data from Yahoo Finance."""
     if not ticker: 
         return {}
@@ -31,31 +31,61 @@ def fetch_market_data(ticker: str) -> dict:
         return {}
 
 def synthesize_report(extracted_data: dict) -> dict:
-    """Passes raw extraction + market data to Gemini to finalize the report."""
+    """Synthesize extracted data with analyst insights and market data."""
     client = _get_client()
     
-    ticker = extracted_data.get("nse_code")
-    if not ticker and extracted_data.get("company_name"):
-        ticker = extracted_data["company_name"].split()[0].upper()
+    ticker = extracted_data.get("nse_code") or extracted_data.get("bse_code")
+    company_name = extracted_data.get("company_name", "")
+    
+    if not ticker and company_name:
+        ticker = company_name.split()[0].upper()
         
-    market_data = fetch_market_data(ticker)
+    market_data = fetch_market_data(ticker, company_name)
+    
+    if market_data.get('cmp') and not extracted_data.get('cmp'):
+        extracted_data['cmp'] = market_data['cmp']
+    if market_data.get('stock_type') and not extracted_data.get('stock_type'):
+        extracted_data['stock_type'] = market_data['stock_type']
     
     prompt = f"""
-    You are the Lead Equity Research Analyst at a major brokerage. 
-    I have provided the raw historical facts extracted from a corporate earnings document, along with market metrics.
+    You are a Lead Equity Research Analyst at a major brokerage firm like Geojit.
     
-    Raw Corporate Data: {json.dumps(extracted_data)}
-    Live Market Data: {json.dumps(market_data)}
+    I have extracted financial data from a corporate earnings document. Your task is to:
     
-    YOUR TASK:
-    1. Merge the Live Market Data into the final output.
-    2. Act as the Analyst: If 'annual_estimates' lacks forward years (e.g., FY26E), generate reasonable projections based on historical trajectory.
-    3. Formulate a professional 'outlook_valuation' paragraph explaining your thesis.
-    4. Calculate a 'target_price' using standard multiple models (e.g., P/E or EV/EBITDA on your forward estimates).
-    5. Assign a 'rating' (BUY/HOLD/SELL/ACCUMULATE/REDUCE) derived strictly from the upside percentage between 'cmp' and 'target_price'.
-    6. Calculate the 'return_pct'.
+    1. VALIDATE RATINGS: If no rating is present, calculate one based on valuation:
+       - BUY: upside > 15%
+       - ACCUMULATE: upside 10-15%
+       - HOLD: upside 0-10%
+       - REDUCE: downside 0-10%
+       - SELL: downside > 10%
     
-    Output strict JSON matching the schema. You must populate the rating, target_price, and missing forward estimates.
+    2. TARGET PRICE CALCULATION: If missing, calculate using:
+       - Forward P/E multiple (use historical average or peer comparison)
+       - OR EV/EBITDA multiple
+       - OR P/B multiple
+       Apply 12-month forward estimate
+    
+    3. FILL MISSING FORWARD ESTIMATES: If FY26E, FY27E missing:
+       - Calculate based on historical CAGR
+       - Conservative assumptions for mature companies
+       - Growth assumptions for high-growth sectors
+    
+    4. OUTLOOK PARAGRAPH: Generate a 3-4 sentence professional outlook that:
+       - Addresses the company's competitive position
+       - Discusses growth drivers or headwinds
+       - Justifies the valuation and rating
+    
+    Extracted Data:
+    {json.dumps(extracted_data, indent=2)}
+    
+    Output MUST be valid JSON matching this schema with all required fields populated:
+    - rating (BUY/HOLD/SELL/ACCUMULATE/REDUCE)
+    - target_price (calculated if missing)
+    - return_pct (upside/downside %)
+    - outlook_valuation (professional paragraph)
+    - annual_estimates (complete with projections if needed)
+    
+    Be analytical but conservative. Do not over-estimate growth.
     """
     
     response = client.models.generate_content(
@@ -64,8 +94,16 @@ def synthesize_report(extracted_data: dict) -> dict:
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=FINANCIAL_SCHEMA,
-            temperature=0.2, 
+            temperature=0.3,
         )
     )
     
-    return json.loads(response.text.strip())
+    synthesized = json.loads(response.text.strip())
+    result = {**extracted_data, **synthesized}
+    
+    if not result.get('rating'):
+        result['rating'] = 'HOLD'
+    if not result.get('outlook_valuation'):
+        result['outlook_valuation'] = 'Company shows stable operational performance with growing market presence.'
+    
+    return result

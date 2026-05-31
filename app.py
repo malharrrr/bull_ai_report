@@ -269,8 +269,5 @@ def download(filename):
     return send_file(str(path), as_attachment=True, download_name=safe, mimetype="application/pdf")
 
 if __name__ == "__main__":
-    print("=" * 50)
-    print("  Bull AI Report Generator")
-    print("  http://localhost:5000")
-    print("=" * 50)
-    app.run(debug=True, port=5000)
+    print("  http://localhost:5001")
+    app.run(debug=True, port=5001)
