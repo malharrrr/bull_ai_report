@@ -1,0 +1,7 @@
+flask
+reportlab
+matplotlib
+google-genai
+pdfplumber
+python-dotenv
+numpy
