@@ -59,9 +59,10 @@ def generate():
         if not data.get("company_name"):
             data["company_name"] = "Company Report"
 
-        safe_name = "".join(c for c in data["company_name"] if c.isalnum() or c in " _-")
-        pdf_name = f"{safe_name.strip().replace(' ','_')}_{uid[:8]}.pdf"
-        output_path = OUTPUT_DIR / pdf_name
+        safe_name = "".join(c for c in data["company_name"] if c.isalnum() or c in " _-").strip().replace(" ", "_")
+        download_name = f"{safe_name}_{uid[:8]}.pdf" if safe_name else f"Company_Report_{uid[:8]}.pdf"
+        stored_pdf_name = f"{uid}.pdf"
+        output_path = OUTPUT_DIR / stored_pdf_name
         
         generate_report(data, str(output_path))
 
@@ -69,7 +70,7 @@ def generate():
             "company_name": data.get("company_name"),
             "rating":       data.get("rating"),
             "target_price": data.get("target_price"),
-            "download_url": f"/download/{pdf_name}",
+            "download_url": f"/download/{uid}?download_name={download_name}",
         })
 
     except Exception as exc:
@@ -82,10 +83,13 @@ def generate():
             pass
 
 
-@app.route("/download/<filename>")
-def download(filename):
-    safe = Path(filename).name
-    path = (OUTPUT_DIR / safe).resolve(strict=False) 	
+@app.route("/download/<file_id>")
+def download(file_id):
+    if len(file_id) != 32 or any(c not in "0123456789abcdef" for c in file_id):
+        return "Invalid file id.", 400
+
+    safe_stored_name = f"{file_id}.pdf"
+    path = (OUTPUT_DIR / safe_stored_name).resolve(strict=False)
     try:
         path.relative_to(OUTPUT_DIR)
     except ValueError:
@@ -93,7 +97,13 @@ def download(filename):
 
     if not path.exists() or not path.is_file():
         return "File not found.", 404
-    return send_file(str(path), as_attachment=True, download_name=safe, mimetype="application/pdf")
+
+    requested_name = request.args.get("download_name", safe_stored_name)
+    safe_download_name = Path(requested_name).name
+    if not safe_download_name.lower().endswith(".pdf"):
+        safe_download_name = f"{safe_download_name}.pdf"
+
+    return send_file(str(path), as_attachment=True, download_name=safe_download_name, mimetype="application/pdf")
 
 
 if __name__ == "__main__":
