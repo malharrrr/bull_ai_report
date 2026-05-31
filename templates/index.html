@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bull AI — Equity Research</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-left">
+    <div class="masthead-wordmark">Bull<span>AI</span></div>
+    <div class="masthead-tagline">Equity Research Generator</div>
+  </div>
+  <div class="masthead-right">
+    <span>Powered by Gemini AI</span>
+  </div>
+</header>
+<div class="accent-rule"></div>
+
+<main class="page">
+  <div class="center-col">
+
+    <p class="eyebrow">Research Automation</p>
+    <h1 class="hero-heading">From earnings doc<br>to broker report.</h1>
+    <p class="hero-sub">
+      Upload any investor presentation or quarterly results document.
+      Our pipeline extracts, analyses, and renders a professional
+      equity research PDF in seconds.
+    </p>
+
+    <div class="form-card">
+      <form id="uploadForm" autocomplete="off">
+
+        <div class="field-group">
+          <label for="companyName">Company Name</label>
+          <input type="text" id="companyName" name="company_name"
+                 placeholder="e.g. JSW Energy Limited" required>
+        </div>
+
+        <div class="field-group">
+          <label>Source Document</label>
+          <div class="drop-zone" id="dropZone">
+            <input type="file" id="fileInput" name="file" accept=".pdf,.txt,.csv">
+            <div id="dropContent">
+              <div class="drop-icon">↑</div>
+              <div class="drop-label">
+                Drop file here, or
+                <u onclick="document.getElementById('fileInput').click()">browse</u>
+              </div>
+              <div class="drop-types">PDF · TXT · CSV</div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="form-rule">
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          Generate Report
+        </button>
+      </form>
+
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-status" id="statusText">initialising…</div>
+        <div class="steps">
+          <div class="step" id="step1">01 · Extract</div>
+          <div class="step" id="step2">02 · Analyse</div>
+          <div class="step" id="step3">03 · Render</div>
+        </div>
+      </div>
+
+      <div class="result-box" id="resultBox">
+        <div class="result-headline">Report ready.</div>
+        <div class="result-meta" id="resultMeta"></div>
+        <a href="#" id="downloadLink" class="download-btn">↓ Download PDF</a>
+      </div>
+
+      <div class="error-box" id="errorBox">
+        <div class="error-headline">Generation failed</div>
+        <div class="error-body" id="errorText"></div>
+      </div>
+    </div>
+
+    <div class="info-strip">
+      <span class="info-item"><strong>Formats:</strong> PDF, TXT, CSV</span>
+      <span class="info-item"><strong>Output:</strong> A4 Research PDF</span>
+      <span class="info-item"><strong>Model:</strong> Gemini 3.1 Flash</span>
+      <span class="info-item"><strong>Charts:</strong> Revenue · EBITDA · PAT</span>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <span>Bull AI © 2026 — Informational purposes only. Not investment advice.</span>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
