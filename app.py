@@ -1,4 +1,3 @@
-from importlib.resources import path
 import os
 import uuid
 import traceback
@@ -48,7 +47,8 @@ def generate():
         return jsonify({"error": "Unsupported file type."}), 400
 
     uid = uuid.uuid4().hex
-    upload_path = UPLOAD_DIR / f"{uid}.bin"
+    suffix = Path(uploaded.filename).suffix.lower()
+    upload_path = UPLOAD_DIR / f"{uid}{suffix}"
     uploaded.save(str(upload_path))
 
     try:
