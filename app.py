@@ -5,7 +5,7 @@ import traceback
 from pathlib import Path
 
 from flask import (
-    Flask, request, send_file, jsonify, render_template
+    Flask, request, send_file, send_from_directory, jsonify, render_template
 )
 from dotenv import load_dotenv
 
@@ -103,7 +103,13 @@ def download(file_id):
     if not safe_download_name.lower().endswith(".pdf"):
         safe_download_name = f"{safe_download_name}.pdf"
 
-    return send_file(str(path), as_attachment=True, download_name=safe_download_name, mimetype="application/pdf")
+    return send_from_directory(
+        directory=str(OUTPUT_DIR),
+        path=safe_stored_name,
+        as_attachment=True,
+        download_name=safe_download_name,
+        mimetype="application/pdf",
+    )
 
 
 if __name__ == "__main__":
