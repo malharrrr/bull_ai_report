@@ -19,26 +19,6 @@ from reportlab.platypus import (
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
-def _register_fonts():
-    fonts = [
-        ("Lora",              "/usr/share/fonts/truetype/google-fonts/Lora-Variable.ttf"),
-        ("Lora-Bold",         "/usr/share/fonts/truetype/google-fonts/Lora-Variable.ttf"),
-        ("Lora-Italic",       "/usr/share/fonts/truetype/google-fonts/Lora-Italic-Variable.ttf"),
-        ("LibSans",           "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"),
-        ("LibSans-Bold",      "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"),
-        ("LibSans-Italic",    "/usr/share/fonts/truetype/liberation/LiberationSans-Italic.ttf"),
-        ("LibSerif",          "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf"),
-        ("LibSerif-Bold",     "/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf"),
-        ("LibSerif-Italic",   "/usr/share/fonts/truetype/liberation/LiberationSerif-Italic.ttf"),
-    ]
-    for name, path in fonts:
-        try:
-            pdfmetrics.registerFont(TTFont(name, path))
-        except Exception:
-            pass 
-
-_register_fonts()
-
 INK         = colors.HexColor("#111111")     
 PAPER       = colors.HexColor("#FAFAF8")     
 RULE        = colors.HexColor("#CCCCCC")    
@@ -62,41 +42,41 @@ def S(name, **kw):
     return ParagraphStyle(name, parent=_base["Normal"], **kw)
 
 STYLES = {
-    "co_name":    S("CoName",   fontName="Lora-Bold",    fontSize=22, leading=26,
+    "co_name":    S("CoName",   fontName="Times-Bold",    fontSize=22, leading=26,
                                 textColor=INK, spaceAfter=2),
-    "eyebrow":    S("Eyebrow",  fontName="LibSans",      fontSize=7.5, leading=10,
+    "eyebrow":    S("Eyebrow",  fontName="Helvetica",      fontSize=7.5, leading=10,
                                 textColor=MUTED, spaceAfter=2, spaceBefore=0,
                                 letterSpacing=1.2),
-    "kicker":     S("Kicker",   fontName="LibSans-Bold", fontSize=7.5, leading=10,
+    "kicker":     S("Kicker",   fontName="Helvetica-Bold", fontSize=7.5, leading=10,
                                 textColor=ACCENT, spaceAfter=6, letterSpacing=1.0),
 
-    "body":       S("Body",     fontName="LibSans",      fontSize=8.5, leading=12, textColor=INK),
-    "body_bold":  S("BodyBold", fontName="LibSans-Bold", fontSize=8.5, leading=12, textColor=INK),
-    "body_muted": S("BodyMuted",fontName="LibSans",      fontSize=8,   leading=11, textColor=MUTED),
-    "body_serif": S("BodySerif",fontName="LibSerif",     fontSize=9,   leading=13.5,
+    "body":       S("Body",     fontName="Helvetica",      fontSize=8.5, leading=12, textColor=INK),
+    "body_bold":  S("BodyBold", fontName="Helvetica-Bold", fontSize=8.5, leading=12, textColor=INK),
+    "body_muted": S("BodyMuted",fontName="Helvetica",      fontSize=8,   leading=11, textColor=MUTED),
+    "body_serif": S("BodySerif",fontName="Times-Roman",     fontSize=9,   leading=13.5,
                                 textColor=INK, alignment=TA_JUSTIFY, spaceAfter=4),
 
-    "sec_label":  S("SecLabel", fontName="LibSans-Bold", fontSize=7,   leading=9,
+    "sec_label":  S("SecLabel", fontName="Helvetica-Bold", fontSize=7,   leading=9,
                                 textColor=ACCENT, letterSpacing=1.5, spaceAfter=3),
 
-    "tbl_hdr":    S("TblHdr",   fontName="LibSans-Bold", fontSize=7.5, leading=10,
+    "tbl_hdr":    S("TblHdr",   fontName="Helvetica-Bold", fontSize=7.5, leading=10,
                                 textColor=INK),
-    "tbl_cell":   S("TblCell",  fontName="LibSans",      fontSize=7.5, leading=10,
+    "tbl_cell":   S("TblCell",  fontName="Helvetica",      fontSize=7.5, leading=10,
                                 textColor=INK, alignment=TA_RIGHT),
-    "tbl_label":  S("TblLabel", fontName="LibSans",      fontSize=7.5, leading=10,
+    "tbl_label":  S("TblLabel", fontName="Helvetica",      fontSize=7.5, leading=10,
                                 textColor=INK),
-    "tbl_italic": S("TblItalic",fontName="LibSans-Italic",fontSize=7.5, leading=10,
+    "tbl_italic": S("TblItalic",fontName="Helvetica-Oblique",fontSize=7.5, leading=10,
                                 textColor=MUTED),
 
-    "badge":      S("Badge",    fontName="LibSans-Bold", fontSize=13,  leading=16,
+    "badge":      S("Badge",    fontName="Helvetica-Bold", fontSize=13,  leading=16,
                                 textColor=WHITE, alignment=TA_CENTER),
-    "badge_sub":  S("BadgeSub", fontName="LibSans",      fontSize=7,   leading=9,
+    "badge_sub":  S("BadgeSub", fontName="Helvetica",      fontSize=7,   leading=9,
                                 textColor=WHITE, alignment=TA_CENTER),
 
-    "bullet":     S("Bullet",   fontName="LibSans",      fontSize=8.5, leading=13,
+    "bullet":     S("Bullet",   fontName="Helvetica",      fontSize=8.5, leading=13,
                                 textColor=INK, leftIndent=10, spaceAfter=3),
 
-    "footer":     S("Footer",   fontName="LibSans",      fontSize=6.5, leading=9,
+    "footer":     S("Footer",   fontName="Helvetica",      fontSize=6.5, leading=9,
                                 textColor=MUTED, alignment=TA_CENTER),
 }
 
@@ -123,7 +103,6 @@ def _rating_color(r):
     return MUTED
 
 def _section(title):
-    """Minimal section label — all-caps small text + full-width rule."""
     return [
         Paragraph(title.upper(), STYLES["sec_label"]),
         HRFlowable(width=COL_W, thickness=0.75, color=ACCENT, spaceAfter=4),
@@ -164,7 +143,6 @@ def _to_img(fig, w=210, h=125):
     return Image(buf, width=w, height=h)
 
 def _bar_colors(values, hi="#B85C38", lo="#CCCCCC"):
-    """Accent the tallest bar, grey the rest."""
     if not values: return [lo]
     mx = max(values)
     return [hi if v == mx else lo for v in values]
@@ -234,10 +212,9 @@ def build_pat_chart(data):
     return _to_img(fig)
 
 def _data_table(rows, col_widths, alt_rows=True):
-    """Render a ruled data table with alternating row tints, no heavy box."""
     tbl = Table(rows, colWidths=col_widths, repeatRows=1)
     cmds = [
-        ("FONTNAME",      (0,0), (-1,0),   "LibSans-Bold"),
+        ("FONTNAME",      (0,0), (-1,0),   "Helvetica-Bold"),
         ("FONTSIZE",      (0,0), (-1,-1),  7.5),
         ("LEADING",       (0,0), (-1,-1),  10),
         ("TOPPADDING",    (0,0), (-1,-1),  3),
@@ -258,7 +235,6 @@ def _data_table(rows, col_widths, alt_rows=True):
     return tbl
 
 def generate_report(data: dict, output_path: str) -> str:
-
     doc = SimpleDocTemplate(
         output_path, pagesize=A4,
         topMargin=MARGIN, bottomMargin=MARGIN,
@@ -312,7 +288,7 @@ def generate_report(data: dict, output_path: str) -> str:
     ]))
 
     rating_label = Table([
-        [Paragraph(rating, ParagraphStyle("RatingBig", fontName="Lora-Bold",
+        [Paragraph(rating, ParagraphStyle("RatingBig", fontName="Times-Bold",
                     fontSize=16, leading=20, textColor=WHITE, alignment=TA_CENTER))],
     ], colWidths=[COL_W*0.34])
     rating_label.setStyle(TableStyle([
