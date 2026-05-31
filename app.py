@@ -93,6 +93,5 @@ def download(filename):
 
 
 if __name__ == "__main__":
-    print("  Bull AI Report Generator")
-    print("  http://localhost:5001")
-    app.run(host="0.0.0.0", debug=True, port=5001)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
