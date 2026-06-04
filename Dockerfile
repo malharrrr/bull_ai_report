@@ -30,7 +30,7 @@ RUN mkdir uploads outputs
 
 COPY templates/ ./templates/
 COPY static/ ./static/
-COPY app.py extractor.py analyst_agent.py report_generator.py ./
+COPY app.py extractor.py analyst_agent.py report_generator.py logging_config.py ./
 
 EXPOSE 5000
 
