@@ -11,4 +11,4 @@ services:
     env_file:
       - .env
     environment:
-      - FLASK_ENV=development
+      - FLASK_ENV=production

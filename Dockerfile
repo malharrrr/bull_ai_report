@@ -37,4 +37,12 @@ EXPOSE 5000
 ENV PYTHONUNBUFFERED=1 \
     FLASK_ENV=production
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", \
+     "--bind", "0.0.0.0:5000", \
+     "--timeout", "120", \
+     "--workers", "2", \
+     "--worker-class", "sync", \
+     "--keep-alive", "5", \
+     "--max-requests", "1000", \
+     "--max-requests-jitter", "100", \
+     "app:app"]
